@@ -13,11 +13,25 @@ CLASS my_grid DEFINITION INHERITING FROM cl_gui_alv_grid.
     METHODS set_resize_cols_public
       IMPORTING
         res TYPE i.
+    METHODS get_scroll_pos
+      RETURNING
+        value(es_col_info) TYPE lvc_s_col.
+    METHODS set_scroll_pos
+      IMPORTING
+        is_col_info TYPE lvc_s_col.
+
 ENDCLASS.
 
 CLASS my_grid IMPLEMENTATION.
   METHOD set_resize_cols_public.
     set_resize_cols( res ).
+  ENDMETHOD.
+
+  METHOD get_scroll_pos.
+    get_scroll_info_via_id( IMPORTING es_col_info = es_col_info ).
+  ENDMETHOD.
+  METHOD set_scroll_pos.
+    set_scroll_info_via_id( is_col_info = is_col_info ).
   ENDMETHOD.
 
 ENDCLASS.
@@ -162,7 +176,6 @@ CLASS multi_title_grid IMPLEMENTATION.
         <field_head>-edit_mask = space.
         <field_head>-convexit  = space.
         IF <field_head>-key = abap_true.
-          <field_head>-key = abap_false.
           <field_head>-emphasize = 'C310'.
         ELSE.
           <field_head>-emphasize = 'C300'.
@@ -189,8 +202,6 @@ CLASS multi_title_grid IMPLEMENTATION.
             text1  = CONV #( <field_head>-scrtext_s )
             text2  = CONV #( <field_head>-scrtext_m )
             text3  = CONV #( <field_head>-reptext ) ).
-
-
         ENDLOOP.
 
       CATCH cx_sy_table_creation.
@@ -261,6 +272,9 @@ CLASS multi_title_grid IMPLEMENTATION.
     ENDLOOP.
 
     grid_data->set_frontend_fieldcatalog( fcat_data ).
+
+    grid_data->set_scroll_pos( is_col_info = grid_head->get_scroll_pos( ) ).
+
     grid_data->refresh_table_display(
       i_soft_refresh = abap_true
       is_stable = VALUE #(
